@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: infimum
+# key: inf
+# --
+\inf_{$1}$0
