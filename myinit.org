@@ -1,0 +1,378 @@
+* interface tweaks
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (setq inhibit-startup-message t)
+    (tool-bar-mode -1)
+    (fset 'yes-or-no-p 'y-or-n-p)
+    (global-set-key (kbd "<f5>") 'revert-buffer)
+    (setq scroll-margin 5
+	  scroll-conservatively 9999
+	  scroll-step 1)
+    ;; start maximized
+    (add-to-list 'default-frame-alist '(fullscreen . maximized))
+    ;; fallback font
+    (set-fontset-font "fontset-default" 'hangul '("Noto Serif CJK KR" . "unicode-bmp"))
+  #+END_SRC
+** show line numbers
+   #+BEGIN_SRC emacs-lisp :tangle yes
+     (setq-default display-line-numbers 'visual
+		   display-line-numbers-widen t
+		   ;; this is the default
+		   display-line-numbers-current-absolute t)
+
+     (defun noct:relative ()
+       (setq-local display-line-numbers 'visual))
+
+     (defun noct:absolute ()
+       (setq-local display-line-numbers t))
+
+     (add-hook 'evil-insert-state-entry-hook #'noct:absolute)
+     (add-hook 'evil-insert-state-exit-hook #'noct:relative)
+   #+END_SRC
+* bookmarks
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (setq bookmark-default-file "~/.emacs.d/bookmarks"
+	  bookmark-save-flag 1) ;; save after every change
+  #+END_SRC
+* use package
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (straight-use-package 'use-package)
+  #+END_SRC
+* evil
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (use-package evil
+      :straight t
+      :init
+      (setq evil-want-integration nil)
+      (setq evil-vsplit-window-right t)
+      (setq evil-split-window-below t)
+      :config
+      (evil-mode))
+
+    (use-package evil-collection
+      :straight t
+      :after evil
+      :custom
+      (evil-collection-setup-minibuffer t)
+      :config
+      (evil-collection-init))
+  #+END_SRC
+* flx
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (straight-use-package 'flx)
+  #+END_SRC
+* helm -- trying to change to ivy
+  #+BEGIN_SRC emacs-lisp :tangle no
+    (use-package helm
+      :straight t
+      :bind (("M-x" . helm-M-x)
+	     ("C-x r b" . helm-filtered-bookmarks)
+	     ("C-x C-f" . helm-find-files)
+	     ("C-x C-b" . helm-buffers-list))
+      :config
+      (helm-mode 1))
+  #+END_SRC
+** helm-rg
+   #+BEGIN_SRC emacs-lisp :tangle no
+     (use-package helm-rg
+       :straight t)
+   #+END_SRC
+** helm-projectile
+   #+BEGIN_SRC emacs-lisp :tangle no
+     (use-package helm-projectile
+       :straight t
+       :config
+       (helm-projectile-on))
+   #+END_SRC
+* ivy
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (use-package counsel
+      :straight t
+      :init
+      (setq ivy-use-virtual-buffers t)
+      (setq enable-recursive-minibuffers t)
+      :bind (("C-s" . 'swiper)
+	     ("C-c C-r" . 'ivy-resume)
+	     ("M-x" . 'counsel-M-x)
+	     ("C-x C-f" . 'counsel-find-file)
+	     ("<f1> f" . 'counsel-describe-function)
+	     ("<f1> v" . 'counsel-describe-variable)
+	     ("<f1> l" . 'counsel-find-library)
+	     ("<f2> i" . 'counsel-info-lookup-symbol)
+	     ("<f2> u" . 'counsel-unicode-char)
+	     ("C-c g" . 'counsel-git)
+	     ("C-c j" . 'counsel-git-grep)
+	     ("C-c k" . 'counsel-ag)
+	     ("C-x l" . 'counsel-locate)
+	     ("C-S-o" . 'counsel-rhythmbox)
+	     :map minibuffer-local-map
+	     ("C-r" . 'counsel-minibuffer-history))
+      :config
+      (ivy-mode 1))
+  #+END_SRC
+** ivy projectile
+   #+BEGIN_SRC emacs-lisp :tangle yes
+     (use-package counsel-projectile
+       :straight t
+       :config
+       (counsel-projectile-mode))
+   #+END_SRC
+* org tweaks
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (setq org-agenda-files (list "~/org/gtd.org"
+				 "~/org/gcal.org"))
+    (setq org-default-notes-file "~/org/notes.org")
+    (setq org-agenda-start-on-weekday nil)
+    (setq org-capture-templates
+	  '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
+	     "* TODO %?\n  %i\n  %a")
+	    ("j" "Journal" entry (file+datetree "~/org/journal.org")
+	     "* %?\nEntered on %U\n  %i\n  %a")
+	    ("n" "Notes" entry (file+datetree "~/org/notes.org")
+	     "* %?\nEntered on %U\n  %i\n  %a")
+	    ("a" "Appointment" entry (file  "~/org/gcal.org" )
+	     "* %?\n\n  :PROPERTIES:\n  :LOCATION:\n\n  :END:\n\n  %^T\n\n")))
+
+    (global-set-key "\C-cl" 'org-store-link)
+    (global-set-key "\C-ca" 'org-agenda)
+    (global-set-key "\C-cc" 'org-capture)
+    (global-set-key "\C-cb" 'org-switchb)
+
+    (add-hook 'org-agenda-mode-hook (lambda () (org-gcal-sync)))
+    (add-hook 'org-capture-after-finalize-hook (lambda () (org-gcal-sync)))
+  #+END_SRC
+* company
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (use-package company
+      :straight t
+      :init
+      (add-hook 'after-init-hook 'global-company-mode))
+  #+END_SRC
+** quickhelp
+   #+BEGIN_SRC emacs-lisp :tangle yes
+     (use-package company-quickhelp
+       :straight t
+       :config
+       (company-quickhelp-mode))
+   #+END_SRC
+** jedi
+   #+BEGIN_SRC emacs-lisp :tangle yes
+     (defun my/python-mode-hook ()
+       (add-to-list 'company-backends 'company-jedi))
+
+     (use-package company-jedi
+       :straight t
+       :init
+       (add-hook 'python-mode-hook 'my/python-mode-hook))
+   #+END_SRC
+* auctex
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (straight-use-package 'auctex)
+    (add-hook 'LaTeX-mode-hook
+	      (lambda () (local-set-key (kbd "C-0") #'run-latexmk)))
+
+    ;;; AUCTeX
+    ;; Customary Customization, p. 1 and 16 in the manual, and http://www.emacswiki.org/emacs/AUCTeX#toc2
+    (setq TeX-parse-self t); Enable parse on load.
+    (setq TeX-auto-save t); Enable parse on save.
+    (setq-default TeX-master nil)
+
+    (setq TeX-PDF-mode t); PDF mode (rather than DVI-mode)
+
+    (add-hook 'TeX-mode-hook 'flyspell-mode); Enable Flyspell mode for TeX modes such as AUCTeX. Highlights all misspelled words.
+    (add-hook 'emacs-lisp-mode-hook 'flyspell-prog-mode); Enable Flyspell program mode for emacs lisp mode, which highlights all misspelled words in comments and strings.
+    (setq ispell-dictionary "english"); Default dictionary. To change do M-x ispell-change-dictionary RET.
+    (add-hook 'TeX-mode-hook
+	      (lambda () (TeX-fold-mode 1))); Automatically activate TeX-fold-mode.
+    (setq LaTeX-babel-hyphen nil); Disable language-specific hyphen insertion.
+
+    ;; " expands into csquotes macros (for this to work babel must be loaded after csquotes).
+    (setq LaTeX-csquotes-close-quote "}"
+	  LaTeX-csquotes-open-quote "\\enquote{")
+
+    ;; LaTeX-math-mode http://www.gnu.org/s/auctex/manual/auctex/Mathematics.html
+    (add-hook 'TeX-mode-hook 'LaTeX-math-mode)
+
+    (defun run-latexmk ()
+      (interactive)
+      (let ((TeX-save-query nil)
+	    (TeX-process-asynchronous nil)
+	    (master-file (TeX-master-file)))
+	(TeX-save-document "")
+	(TeX-run-TeX "latexmk"
+		     (TeX-command-expand "latexmk %t" 'TeX-master-file)
+		     master-file)
+	(if (plist-get TeX-error-report-switches (intern master-file))
+	    (TeX-next-error t)
+	  (minibuffer-message "latexmk done"))))
+  #+END_SRC
+** reftex
+   #+BEGIN_SRC emacs-lisp :tangle yes
+     (add-hook 'TeX-mode-hook 'turn-on-reftex)
+
+     ;; eqref
+     (setq reftex-label-alist '(AMSTeX))
+
+     (eval-after-load 'reftex-vars; Is this construct really needed?
+       '(progn
+	  (setq reftex-cite-prompt-optional-args t); Prompt for empty optional arguments in cite macros.
+	  ;; Make RefTeX interact with AUCTeX, http://www.gnu.org/s/auctex/manual/reftex/AUCTeX_002dRefTeX-Interface.html
+	  (setq reftex-plug-into-AUCTeX t)
+	  ;; So that RefTeX also recognizes \addbibresource. Note that you
+	  ;; can't use $HOME in path for \addbibresource but that "~"
+	  ;; works.
+	  (setq reftex-bibliography-commands '("bibliography" "nobibliography" "addbibresource"))
+					   ; (setq reftex-default-bibliography '("UNCOMMENT LINE AND INSERT PATH TO YOUR BIBLIOGRAPHY HERE")); So that RefTeX in Org-mode knows bibliography
+	  (setcdr (assoc 'caption reftex-default-context-regexps) "\\\\\\(rot\\|sub\\)?caption\\*?[[{]"); Recognize \subcaptions, e.g. reftex-citation
+	  (setq reftex-cite-format; Get ReTeX with biblatex, see https://tex.stackexchange.com/questions/31966/setting-up-reftex-with-biblatex-citation-commands/31992#31992
+		'((?t . "\\textcite[]{%l}")
+		  (?a . "\\autocite[]{%l}")
+		  (?c . "\\cite[]{%l}")
+		  (?s . "\\smartcite[]{%l}")
+		  (?f . "\\footcite[]{%l}")
+		  (?n . "\\nocite{%l}")
+		  (?b . "\\blockcquote[]{%l}{}")))))
+   #+END_SRC
+** fontification
+   #+BEGIN_SRC emacs-lisp :tangle yes
+      (setq font-latex-match-reference-keywords
+	    '(;; biblatex
+	      ("printbibliography" "[{")
+	      ("addbibresource" "[{")
+	      ;; Standard commands
+	      ;; ("cite" "[{")
+	      ("Cite" "[{")
+	      ("parencite" "[{")
+	      ("Parencite" "[{")
+	      ("footcite" "[{")
+	      ("footcitetext" "[{")
+	      ;; Style-specific commands
+	      ("textcite" "[{")
+	      ("Textcite" "[{")
+	      ("smartcite" "[{")
+	      ("Smartcite" "[{")
+	      ("cite*" "[{")
+	      ("parencite*" "[{")
+	      ("supercite" "[{")
+	      ;; Qualified citation lists
+	      ("cites" "[{")
+	      ("Cites" "[{")
+	      ("parencites" "[{")
+	      ("Parencites" "[{")
+	      ("footcites" "[{")
+	      ("footcitetexts" "[{")
+	      ("smartcites" "[{")
+	      ("Smartcites" "[{")
+	      ("textcites" "[{")
+	      ("Textcites" "[{")
+	      ("supercites" "[{")
+	      ;; Style-independent commands
+	      ("autocite" "[{")
+	      ("Autocite" "[{")
+	      ("autocite*" "[{")
+	      ("Autocite*" "[{")
+	      ("autocites" "[{")
+	      ("Autocites" "[{")
+	      ;; Text commands
+	      ("citeauthor" "[{")
+	      ("Citeauthor" "[{")
+	      ("citetitle" "[{")
+	      ("citetitle*" "[{")
+	      ("citeyear" "[{")
+	      ("citedate" "[{")
+	      ("citeurl" "[{")
+	      ;; Special commands
+	      ("fullcite" "[{")))
+
+     (setq font-latex-match-textual-keywords
+	   '(;; biblatex brackets
+	     ("parentext" "{")
+	     ("brackettext" "{")
+	     ("hybridblockquote" "[{")
+	     ;; Auxiliary Commands
+	     ("textelp" "{")
+	     ("textelp*" "{")
+	     ("textins" "{")
+	     ("textins*" "{")
+	     ;; supcaption
+	     ("subcaption" "[{")))
+
+     (setq font-latex-match-variable-keywords
+	   '(;; amsmath
+	     ("numberwithin" "{")
+	     ;; enumitem
+	     ("setlist" "[{")
+	     ("setlist*" "[{")
+	     ("newlist" "{")
+	     ("renewlist" "{")
+	     ("setlistdepth" "{")
+	     ("restartlist" "{")))
+   #+END_SRC
+* flycheck
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (use-package flycheck
+      :straight t
+      :init
+      (add-hook 'after-init-hook #'global-flycheck-mode))
+
+      (use-package flycheck-pos-tip
+      :straight t)
+
+    (with-eval-after-load 'flycheck
+      (flycheck-pos-tip-mode))
+  #+END_SRC
+* magit 
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (use-package magit
+      :straight t
+      :bind (("C-x g" . 'magit-status)))
+  #+END_SRC
+* eyebrowse
+  #+BEGIN_SRC emacs-lisp :tangle no
+    (use-package eyebrowse
+      :straight t
+      :config
+      (eyebrowse-setup-evil-keys)
+      (eyebrowse-mode t))
+  #+END_SRC
+* projectile
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (defun bas/set-projectile-yas-dir ()
+      "Append a projectile-local YAS snippet dir to yas-snippet-dirs."
+      (interactive)
+      (let ((local-yas-dir (concat (projectile-project-root) ".snippets")))
+	(if (file-directory-p local-yas-dir)
+	    (push local-yas-dir yas-snippet-dirs))))
+
+    (use-package projectile
+      :straight t
+      :config
+      (projectile-mode)
+      (add-hook 'projectile-find-file-hook 'bas/set-projectile-yas-dir))
+  #+END_SRC
+* pipenv
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (use-package pipenv
+      :straight t
+      :hook (python-mode . pipenv-mode)
+      :init
+      (setq
+       pipenv-projectile-after-switch-function
+       #'pipenv-projectile-after-switch-extended))
+  #+END_SRC
+* yasnippet 
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (use-package yasnippet
+      :straight t
+      :config
+      (yas-global-mode 1))
+
+    (use-package yasnippet-snippets
+      :straight t)
+  #+END_SRC
+* google this
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (use-package google-this
+      :straight t
+      :config
+      (google-this-mode t))
+  #+END_SRC
