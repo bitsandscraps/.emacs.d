@@ -125,9 +125,9 @@
     (setq org-capture-templates
 	  '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
 	     "* TODO %?\n  %i\n  %a")
-	    ("j" "Journal" entry (file+datetree "~/org/journal.org")
+	    ("j" "Journal" entry (file+olp+datetree "~/org/journal.org")
 	     "* %?\nEntered on %U\n  %i\n  %a")
-	    ("n" "Notes" entry (file+datetree "~/org/notes.org")
+	    ("n" "Notes" entry (file+olp+datetree "~/org/notes.org")
 	     "* %?\nEntered on %U\n  %i\n  %a")
 	    ("a" "Appointment" entry (file  "~/org/gcal.org" )
 	     "* %?\n\n  :PROPERTIES:\n  :LOCATION:\n\n  :END:\n\n  %^T\n\n")))
@@ -138,7 +138,6 @@
     (global-set-key "\C-cb" 'org-switchb)
 
     (add-hook 'org-agenda-mode-hook (lambda () (org-gcal-sync)))
-    (add-hook 'org-capture-after-finalize-hook (lambda () (org-gcal-sync)))
   #+END_SRC
 ** org-gcal
    #+BEGIN_SRC emacs-lisp :tangle yes
@@ -193,6 +192,7 @@
     (setq-default TeX-master nil)
 
     (setq TeX-PDF-mode t); PDF mode (rather than DVI-mode)
+    (setq TeX-source-correlate-mode t)
 
     (add-hook 'TeX-mode-hook 'flyspell-mode); Enable Flyspell mode for TeX modes such as AUCTeX. Highlights all misspelled words.
     (add-hook 'emacs-lisp-mode-hook 'flyspell-prog-mode); Enable Flyspell program mode for emacs lisp mode, which highlights all misspelled words in comments and strings.
@@ -392,6 +392,16 @@
       :config
       (google-this-mode t))
   #+END_SRC
+* markdown mode
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (use-package markdown-mode
+      :straight t
+      :commands (markdown-mode gfm-mode)
+      :mode (("README\\.md\\'" . gfm-mode)
+	     ("\\.md\\'" . markdown-mode)
+	     ("\\.markdown\\'" . markdown-mode))
+      :init (setq markdown-command "multimarkdown"))
+  #+END_SRC
 * mu4e
 ** basic
    #+BEGIN_SRC emacs-lisp :tangle yes
@@ -503,7 +513,8 @@
        (add-hook 'after-init-hook #'mu4e-alert-enable-notifications)
        (add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display))
    #+END_SRC
-** run
-   #+BEGIN_SRC emacs-lisp :tangle yes
-     (mu4e)
-   #+END_SRC
+* run
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (mu4e)
+    (org-agenda-list)
+  #+END_SRC
