@@ -1,6 +1,5 @@
 * interface tweaks
   #+BEGIN_SRC emacs-lisp :tangle yes
-    (setq inhibit-startup-message t)
     (tool-bar-mode -1)
     (fset 'yes-or-no-p 'y-or-n-p)
     (global-set-key (kbd "<f5>") 'revert-buffer)
@@ -90,6 +89,8 @@
       :init
       (setq ivy-use-virtual-buffers t)
       (setq enable-recursive-minibuffers t)
+      ; temporary fix
+      (setq projectile-keymap-prefix (kbd "C-c C-p"))
       :bind (("C-s" . 'swiper)
 	     ("C-c C-r" . 'ivy-resume)
 	     ("M-x" . 'counsel-M-x)
@@ -448,17 +449,7 @@
 ** external commands
    #+BEGIN_SRC emacs-lisp :tangle yes
      (setq mu4e-get-mail-command "/home/wisrl/.local/share/virtualenvs/.offlineimap-NGH8dbgl/bin/offlineimap \
-     -c /home/wisrl/.offlineimap/.offlineimaprc")
-
-     ;; run imapfilter before fetching emails
-     (add-hook 'mu4e-update-pre-hook 'etc/imapfilter)
-     (defun etc/imapfilter ()
-       (message "Running imapfilter...")
-       (with-current-buffer (get-buffer-create " *imapfilter*")
-	 (goto-char (point-max))
-	 (insert "---\n")
-	 (call-process "/home/wisrl/.local/bin/imapfilter" nil (current-buffer) nil "-v"))
-       (message "Running imapfilter...done"))
+     -c /home/wisrl/.offlineimap/offlineimaprc")
    #+END_SRC
 ** read options
    #+BEGIN_SRC emacs-lisp :tangle yes
@@ -516,5 +507,4 @@
 * run
   #+BEGIN_SRC emacs-lisp :tangle yes
     (mu4e)
-    (org-agenda-list)
   #+END_SRC

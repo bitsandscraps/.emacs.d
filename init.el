@@ -62,6 +62,7 @@ Inserted by installing org-mode or when a release is made."
      (output-dvi "xdvi")
      (output-pdf "Okular")
      (output-html "xdg-open"))))
+ '(inhibit-startup-screen t)
  '(tool-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
