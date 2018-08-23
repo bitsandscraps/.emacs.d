@@ -6,6 +6,7 @@
     (setq scroll-margin 5
 	  scroll-conservatively 9999
 	  scroll-step 1)
+    (show-paren-mode t)
     ;; start maximized
     (add-to-list 'default-frame-alist '(fullscreen . maximized))
     ;; fallback font
@@ -27,6 +28,15 @@
      (add-hook 'evil-insert-state-entry-hook #'noct:absolute)
      (add-hook 'evil-insert-state-exit-hook #'noct:relative)
    #+END_SRC
+** indent buffer
+   #+BEGIN_SRC emacs-lisp :tangle yes
+     (defun bas/indent-buffer ()
+       (interactive)
+       (save-excursion
+	(indent-region (point-min) (point-max) nil)))
+
+     (global-set-key [f12] #'bas/indent-buffer)
+   #+END_SRC
 * bookmarks
   #+BEGIN_SRC emacs-lisp :tangle yes
     (setq bookmark-default-file "~/.emacs.d/bookmarks"
@@ -35,6 +45,12 @@
 * use package
   #+BEGIN_SRC emacs-lisp :tangle yes
     (straight-use-package 'use-package)
+  #+END_SRC
+* dash
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (use-package dash
+      :straight t
+      :config (dash-enable-font-lock))
   #+END_SRC
 * evil
   #+BEGIN_SRC emacs-lisp :tangle yes
@@ -89,8 +105,6 @@
       :init
       (setq ivy-use-virtual-buffers t)
       (setq enable-recursive-minibuffers t)
-      ; temporary fix
-      (setq projectile-keymap-prefix (kbd "C-c C-p"))
       :bind (("C-s" . 'swiper)
 	     ("C-c C-r" . 'ivy-resume)
 	     ("M-x" . 'counsel-M-x)
@@ -114,6 +128,9 @@
    #+BEGIN_SRC emacs-lisp :tangle yes
      (use-package counsel-projectile
        :straight t
+       :after (ivy projectile)
+       :init
+       (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
        :config
        (counsel-projectile-mode))
    #+END_SRC
@@ -179,6 +196,21 @@
        :straight t
        :init
        (add-hook 'python-mode-hook 'my/python-mode-hook))
+   #+END_SRC
+* autocomplete
+  #+BEGIN_SRC emacs-lisp :tangle no
+    (use-package auto-complete
+      :straight t
+      :config
+      (ac-config-default))
+  #+END_SRC
+** jedi
+   #+BEGIN_SRC emacs-lisp :tangle no
+     (use-package jedi
+       :straight t
+       :init
+       (setq jedi:complete-on-dot t)
+       :hook (python-mode . jedi:setup))
    #+END_SRC
 * auctex
   #+BEGIN_SRC emacs-lisp :tangle yes
@@ -344,12 +376,11 @@
       :bind (("C-x g" . 'magit-status)))
   #+END_SRC
 * eyebrowse
-  #+BEGIN_SRC emacs-lisp :tangle no
+  #+BEGIN_SRC emacs-lisp :tangle yes
     (use-package eyebrowse
       :straight t
       :config
-      (eyebrowse-setup-evil-keys)
-      (eyebrowse-mode t))
+      (eyebrowse-setup-evil-keys))
   #+END_SRC
 * projectile
   #+BEGIN_SRC emacs-lisp :tangle yes
@@ -366,15 +397,34 @@
       (projectile-mode)
       (add-hook 'projectile-find-file-hook 'bas/set-projectile-yas-dir))
   #+END_SRC
+** projectile register projects
+*** python
+    #+BEGIN_SRC emacs-lisp :tangle yes
+      (projectile-register-project-type 'python '("Pipfile")
+					:test "pipenv run pytest"
+					:test-dir "test"
+					:test-prefix "test_")
+    #+END_SRC
 * pipenv
   #+BEGIN_SRC emacs-lisp :tangle yes
+    (defun bas/pipenv-projectile-after-switch ()
+      "Activate pipenv and setup jedi"
+      ;; Cleanup
+      (pipenv-deactivate)
+      ;; Check if it's a pipenv project
+      (when (pipenv-project?)
+	(pipenv-activate)
+	(pipenv-install (list "--dev" "pylint" jedi:source-dir))
+	(setq jedi:server-command--backup jedi:server-command)
+	(setq jedi:server-command (list (pipenv-executable-find "jediepcserver")))))
+
     (use-package pipenv
       :straight t
       :hook (python-mode . pipenv-mode)
       :init
       (setq
        pipenv-projectile-after-switch-function
-       #'pipenv-projectile-after-switch-extended))
+       #'bas/pipenv-projectile-after-switch))
   #+END_SRC
 * yasnippet 
   #+BEGIN_SRC emacs-lisp :tangle yes
@@ -421,7 +471,7 @@
      ;; use mu4e for e-mail in emacs
      (setq mail-user-agent 'mu4e-user-agent)
 
-     (setq mu4e-update-interval 60)
+     (setq mu4e-update-interval 300)
 
      (setq message-kill-buffer-on-exit t)
 
@@ -439,7 +489,9 @@
 	     '(("/Lab"            . ?l)
 	       ("/Personal"       . ?p)
 	       ("/Personal.Prof"  . ?f)
-	       ("/INBOX"          . ?i)))
+	       ("/INBOX"          . ?i)
+	       ("/EE"             . ?e)
+	       ("/mu4e-trash"     . ?t)))
 
      (global-set-key (kbd "C-c m") 'mu4e)
 
