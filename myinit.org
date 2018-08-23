@@ -348,6 +348,7 @@
       :config
       (projectile-mode)
       (add-hook 'projectile-find-file-hook 'bas/set-projectile-yas-dir))
+
   #+END_SRC
 * pipenv
   #+BEGIN_SRC emacs-lisp :tangle yes
@@ -357,7 +358,7 @@
       :init
       (setq
        pipenv-projectile-after-switch-function
-       #'pipenv-projectile-after-switch-extended))
+       #'pipenv-projectile-after-switch))
   #+END_SRC
 * yasnippet 
   #+BEGIN_SRC emacs-lisp :tangle yes
