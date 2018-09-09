@@ -159,6 +159,22 @@
     (add-hook 'org-agenda-mode-hook (lambda () (org-gcal-sync)))
     (add-hook 'org-capture-after-finalize-hook (lambda () (org-gcal-sync)))
   #+END_SRC
+** org-gcal
+   #+BEGIN_SRC emacs-lisp :tangle yes
+     (require 'auth-source)
+
+     (use-package org-gcal
+       :straight (:host github :repo "kidd/org-gcal.el")
+       :init
+       (let ((found (nth 0 (auth-source-search :host "google-calendar"))))
+	 (if found
+	     (setq org-gcal-client-id (plist-get found :user)
+		   org-gcal-client-secret (let ((secret (plist-get found :secret)))
+					    (if (functionp secret)
+						(funcall secret)
+					      secret))
+		   org-gcal-file-alist '(("forconsilience@gmail.com" . "d:/Dropbox/org/gcal.org"))))))
+   #+END_SRC
 * company
   #+BEGIN_SRC emacs-lisp :tangle yes
     (use-package company
