@@ -10,6 +10,8 @@
      (output-dvi "Yap")
      (output-pdf "SumatraPDF")
      (output-html "start"))))
+ '(epg-gpg-program "c:/Program Files (x86)/GnuPG/bin/gpg.exe")
+ '(epg-gpgconf-program "c:/Program Files (x86)/GnuPG/bin/gpgconf.exe")
  '(inhibit-startup-screen t)
  '(preview-gs-command "mgs")
  '(tool-bar-mode nil))
