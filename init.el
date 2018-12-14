@@ -63,6 +63,7 @@ Inserted by installing org-mode or when a release is made."
      (output-pdf "Okular")
      (output-html "xdg-open"))))
  '(inhibit-startup-screen t)
+ '(org-directory "~/Dropbox/org")
  '(tool-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

@@ -46,6 +46,11 @@
   #+BEGIN_SRC emacs-lisp :tangle yes
     (straight-use-package 'use-package)
   #+END_SRC
+* pass
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (use-package pass
+      :straight t)
+  #+END_SRC
 * dash
   #+BEGIN_SRC emacs-lisp :tangle yes
     (use-package dash
@@ -57,6 +62,7 @@
     (use-package evil
       :straight t
       :init
+      (setq evil-want-keybinding nil)
       (setq evil-want-integration nil)
       (setq evil-vsplit-window-right t)
       (setq evil-split-window-below t)
@@ -136,18 +142,19 @@
    #+END_SRC
 * org tweaks
   #+BEGIN_SRC emacs-lisp :tangle yes
-    (setq org-agenda-files (list "~/org/gtd.org"
-				 "~/org/gcal.org"))
-    (setq org-default-notes-file "~/org/notes.org")
+    (setq org-agenda-files (list "~/Dropbox/org/gtd.org"
+				 "~/Dropbox/org/gcal.org"
+				 "~/Dropbox/org/lab-gcal.org"))
+    (setq org-default-notes-file "~/Dropbox/org/notes.org")
     (setq org-agenda-start-on-weekday nil)
     (setq org-capture-templates
-	  '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
+	  '(("t" "Todo" entry (file+headline "~/Dropbox/org/gtd.org" "Tasks")
 	     "* TODO %?\n  %i\n  %a")
-	    ("j" "Journal" entry (file+olp+datetree "~/org/journal.org")
+	    ("j" "Journal" entry (file+olp+datetree "~/Dropbox/org/journal.org")
 	     "* %?\nEntered on %U\n  %i\n  %a")
-	    ("n" "Notes" entry (file+olp+datetree "~/org/notes.org")
+	    ("n" "Notes" entry (file+olp+datetree "~/Dropbox/org/notes.org")
 	     "* %?\nEntered on %U\n  %i\n  %a")
-	    ("a" "Appointment" entry (file  "~/org/gcal.org" )
+	    ("a" "Appointment" entry (file  "~/Dropbox/org/gcal.org" )
 	     "* %?\n\n  :PROPERTIES:\n  :LOCATION:\n\n  :END:\n\n  %^T\n\n")))
 
     (global-set-key "\C-cl" 'org-store-link)
@@ -159,19 +166,16 @@
   #+END_SRC
 ** org-gcal
    #+BEGIN_SRC emacs-lisp :tangle yes
-     (require 'auth-source)
+     (require 'auth-source-pass)
+     (auth-source-pass-enable)
 
      (use-package org-gcal
        :straight (:host github :repo "kidd/org-gcal.el")
-       :init
-       (let ((found (nth 0 (auth-source-search :host "google-calendar"))))
-	 (if found
-	     (setq org-gcal-client-id (plist-get found :user)
-		   org-gcal-client-secret (let ((secret (plist-get found :secret)))
-					    (if (functionp secret)
-						(funcall secret)
-					      secret))
-		   org-gcal-file-alist '(("forconsilience@gmail.com" . "~/org/gcal.org"))))))
+       :config
+       (setq org-gcal-client-id (password-store--run-show "org-gcal/client-id")
+	     org-gcal-client-secret (password-store--run-show "org-gcal/client-secret")
+	     org-gcal-file-alist '(("forconsilience@gmail.com" . "~/Dropbox/org/gcal.org")
+				   ("student.wisrl@gmail.com" . "~/Dropbox/org/lab-gcal.org"))))
    #+END_SRC
 * company
   #+BEGIN_SRC emacs-lisp :tangle yes
@@ -422,6 +426,7 @@
       :straight t
       :hook (python-mode . pipenv-mode)
       :init
+      (setq pipenv-with-flycheck nil)
       (setq
        pipenv-projectile-after-switch-function
        #'bas/pipenv-projectile-after-switch))
@@ -430,6 +435,8 @@
   #+BEGIN_SRC emacs-lisp :tangle yes
     (use-package yasnippet
       :straight t
+      :init
+      (setq yas-triggers-in-field t)
       :config
       (yas-global-mode 1))
 
@@ -452,6 +459,13 @@
 	     ("\\.md\\'" . markdown-mode)
 	     ("\\.markdown\\'" . markdown-mode))
       :init (setq markdown-command "multimarkdown"))
+  #+END_SRC
+* Highlight Indent Guides
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (use-package highlight-indent-guides
+      :straight t
+      :hook ('prog-mode-hook . 'highlight-indent-guides-mode)
+      :init (setq highlight-indent-guides-method 'character))
   #+END_SRC
 * mu4e
 ** basic
@@ -491,7 +505,9 @@
 	       ("/Personal.Prof"  . ?f)
 	       ("/INBOX"          . ?i)
 	       ("/EE"             . ?e)
-	       ("/mu4e-trash"     . ?t)))
+	       ("/mu4e-trash"     . ?t)
+	       ("/archive"        . ?r)))
+
 
      (global-set-key (kbd "C-c m") 'mu4e)
 
@@ -500,8 +516,8 @@
    #+END_SRC
 ** external commands
    #+BEGIN_SRC emacs-lisp :tangle yes
-     (setq mu4e-get-mail-command "/home/wisrl/.local/share/virtualenvs/.offlineimap-NGH8dbgl/bin/offlineimap \
-     -c /home/wisrl/.offlineimap/offlineimaprc")
+     (setq mu4e-get-mail-command "/home/wisrl/.offlineimap/venv/bin/offlineimap \
+      -c /home/wisrl/.offlineimap/offlineimaprc")
    #+END_SRC
 ** read options
    #+BEGIN_SRC emacs-lisp :tangle yes
