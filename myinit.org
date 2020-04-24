@@ -373,7 +373,7 @@
     (with-eval-after-load 'flycheck
       (flycheck-pos-tip-mode))
   #+END_SRC
-* magit 
+* magit
   #+BEGIN_SRC emacs-lisp :tangle yes
     (use-package magit
       :straight t
@@ -431,7 +431,7 @@
        pipenv-projectile-after-switch-function
        #'bas/pipenv-projectile-after-switch))
   #+END_SRC
-* yasnippet 
+* yasnippet
   #+BEGIN_SRC emacs-lisp :tangle yes
     (use-package yasnippet
       :straight t
@@ -540,7 +540,7 @@
 	   (xwidget-webkit-browse-url (concat "file://" tmpfile) t))))
 
      (add-to-list 'mu4e-view-actions
-		  '("xViewXWidget" . my-mu4e-action-view-with-xwidget) t) 
+		  '("xViewXWidget" . my-mu4e-action-view-with-xwidget) t)
    #+END_SRC
 ** send options
    #+BEGIN_SRC emacs-lisp :tangle yes
